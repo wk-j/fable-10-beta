@@ -17,6 +17,33 @@ let isUndefined(x: 'a) : bool = jsNative
 [<Emit("isNaN(parseFloat($0)) ? null : parseFloat($0)")>]
 let parseFloat (input: string) : float option = jsNative
 
+//type IJQuery = interface end
+
+type IJQuery =
+    abstract css : string * string -> IJQuery
+    abstract addClass : string -> IJQuery
+
+    [<Emit("$0.click($1)")>]
+    abstract onClick : (obj -> unit) -> IJQuery
+
+module JQuery =
+    [<Emit("window['$']($0)")>]
+    let select (selector: string) : IJQuery = jsNative
+
+    [<Emit("window['$']($0)")>]
+    let ready(handler: unit -> unit) : unit = jsNative
+
+    [<Emit("$2.css($0,$1)")>]
+    let css(prop: string) (value: string) (el: IJQuery) : IJQuery = jsNative
+
+    //[<Emit("$1.addClass($0)")>]
+    //let addClass(className: string) (el: IJQuery) : IJQuery = jsNative
+    //let addClass(className: string) : IJQuery = jsNative
+
+    //[<Emit("$1.click($0)")>]
+    //let click(handler: obj -> unit) (el: IJQuery) : IJQuery = jsNative
+
+
 let test() =
     console.log("Hello, world!")
     console.log(undefined)
@@ -28,6 +55,22 @@ let test() =
     match parseFloat "335.83" with
     | Some value -> console.log(value)
     | None -> console.log("parseFloat failed")
+
+
+    (*
+    JQuery.ready(fun () ->
+                 let div = JQuery.select "#main"
+                 div
+                 |> JQuery.css "background-color" "red"
+                 |> JQuery.click (fun ev -> console.log "clicked")
+                 |> JQuery.addClass "fancy-class"
+                 |> ignore )
+           *)
+    JQuery.select("#main")
+        .css("background-color", "lightblue")
+        .css("font-size", "24px")
+        .onClick(fun ev -> console.log("clicked")) |> ignore
+
 
 let init() =
     let canvas = Browser.document.getElementsByTagName_canvas().[0]
